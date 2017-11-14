@@ -12,7 +12,7 @@ public abstract class AbstractDAO<E> {
 	protected final Class<E> cls;
 	
 	public AbstractDAO(Database database, Class<E> cls) {
-		this.ds = database.ds();
+		this.ds = database == null ? null /* for testing */ : database.ds();
 		this.cls = cls;
 	}
 
