@@ -1,6 +1,7 @@
 package de.mwvb.maja.mongo;
 
-import de.mwvb.maja.web.AbstractWebApp;
+import com.google.inject.Inject;
+
 import de.mwvb.maja.web.AppConfig;
 import de.mwvb.maja.web.Plugin;
 
@@ -9,6 +10,8 @@ public class MongoPlugin implements Plugin {
 	private final String dbname;
 	private final Class<?> entityClasses[];
 	private String info;
+	@Inject
+	private AppConfig config;
 	
 	public MongoPlugin(String dbname, Class<?> ... entityClasses) {
 		this.dbname = dbname;
@@ -17,7 +20,6 @@ public class MongoPlugin implements Plugin {
 	
 	@Override
 	public void init() {
-		AppConfig config = AbstractWebApp.config;
 		String host = config.get("dbhost", "localhost");
 		String databaseName = config.get("dbname", dbname);
 		String user = config.get("dbuser");
