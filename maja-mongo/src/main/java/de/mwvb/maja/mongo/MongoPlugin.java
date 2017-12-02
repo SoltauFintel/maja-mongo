@@ -7,16 +7,26 @@ import de.mwvb.maja.web.Plugin;
 public class MongoPlugin implements Plugin {
 	public static Database database;
 	private final String dbname;
+	private final Class<?> entityClasses[];
+	private String info;
 	
-	public MongoPlugin(String dbname) {
+	public MongoPlugin(String dbname, Class<?> ... entityClasses) {
 		this.dbname = dbname;
+		this.entityClasses = entityClasses;
 	}
 	
 	@Override
 	public void init() {
 		AppConfig config = AbstractWebApp.config;
-		database = new Database(config.get("dbhost", "localhost"), config.get("dbname", dbname),
-				config.get("dbuser"), config.get("dbpw"));
+		String host = config.get("dbhost", "localhost");
+		String databaseName = config.get("dbname", dbname);
+		String user = config.get("dbuser");
+		String password = config.get("dbpw");
+		database = new Database(host, databaseName, user, password, entityClasses);
+		info = "MongoDB database: " + databaseName + "@" + host;
+		if (password != null) {
+			info += " with password";
+		}
 	}
 
 	@Override
@@ -25,8 +35,6 @@ public class MongoPlugin implements Plugin {
 	
 	@Override
 	public void printInfo() {
-		AppConfig config = AbstractWebApp.config;
-		System.out.println("MongoDB database: " + config.get("dbname", dbname) + "@" + config.get("dbhost", "localhost")
-			+ (config.get("dbpw") == null ? "" : " with password"));
+		System.out.println(info);
 	}
 }
