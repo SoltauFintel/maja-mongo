@@ -12,7 +12,7 @@ import com.google.inject.Inject;
 
 public abstract class AbstractDAO<E> {
 	@Inject
-	private Database database;
+	private DatabaseFactory databaseFactory;
 	
 	/**
 	 * @return entity class
@@ -61,7 +61,7 @@ public abstract class AbstractDAO<E> {
 	}
 
 	protected final Datastore ds() {
-		return database.ds();
+		return databaseFactory.ds();
 	}
 
 	public static String genId() {
