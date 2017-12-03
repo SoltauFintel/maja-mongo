@@ -12,6 +12,8 @@ import com.mongodb.MongoClient;
 import com.mongodb.MongoCredential;
 import com.mongodb.ServerAddress;
 
+import de.mwvb.maja.web.AppConfig;
+
 /**
  * Zugriff auf MongoDB
  */
@@ -19,10 +21,18 @@ public class Database {
 	private MongoClient client;
 	private Morphia morphia;
 	private Datastore ds;
-	private static String info = "--";
+	private final String info;
 	
 	static {
 		MorphiaLoggerFactory.registerLogger(SLF4JLoggerImplFactory.class);
+	}
+	
+	public static Database open(String dbname, AppConfig config, Class<?> ... entityClasses) {
+		String host = config.get("dbhost", "localhost");
+		String databaseName = config.get("dbname", dbname);
+		String user = config.get("dbuser");
+		String password = config.get("dbpw");
+		return new Database(host, databaseName, user, password, entityClasses);
 	}
 	
 	/**
@@ -48,9 +58,17 @@ public class Database {
 			morphia.mapPackageFromClass(entityClass);
 		}
 		ds.ensureIndexes();
-		info = dbhost + "/" + name + (user == null || user.isEmpty() ? "" : "/" + user);
+		info = "MongoDB database: " + user + (password == null ? "" : "/***") + "@" + name + ":" + dbhost;
 	}
 	
+	/**
+	 * @return Host/Name/User of database
+	 */
+	@Override
+	public String toString() {
+		return info;
+	}
+
 	public Datastore ds() {
 		return ds;
 	}
@@ -60,12 +78,5 @@ public class Database {
 		morphia = null;
 		client.close();
 		client = null;
-	}
-	
-	/**
-	 * @return Host/Name/User of last opened database
-	 */
-	public static String getInfo() {
-		return info;
 	}
 }
