@@ -27,7 +27,7 @@ public class Database {
 		MorphiaLoggerFactory.registerLogger(SLF4JLoggerImplFactory.class);
 	}
 	
-	public static Database open(String dbname, AppConfig config, Class<?> ... entityClasses) {
+	public static Database open(String dbname, AppConfig config, List<Class<?>> entityClasses) {
 		String host = config.get("dbhost", "localhost");
 		String databaseName = config.get("dbname", dbname);
 		String user = config.get("dbuser");
@@ -45,7 +45,7 @@ public class Database {
 	 * @param entityClasses Für jedes Package eine Klasse, damit das Package registriert wird.
 	 * Es muss also NICHT jede Entity Klasse angegeben werden!
 	 */
-	public Database(String dbhost, String name, String user, String password, Class<?> ... entityClasses) {
+	public Database(String dbhost, String name, String user, String password, List<Class<?>> entityClasses) {
 		List<MongoCredential> credentialsList = new ArrayList<>();
 		if (user != null && !user.isEmpty()) {
 			MongoCredential cred = MongoCredential.createCredential(user, name, password.toCharArray());
@@ -54,9 +54,7 @@ public class Database {
 		client = new MongoClient(new ServerAddress(dbhost), credentialsList);
 		morphia = new Morphia();
 		ds = morphia.createDatastore(client, name);
-		for (Class<?> entityClass : entityClasses) {
-			morphia.mapPackageFromClass(entityClass);
-		}
+		entityClasses.forEach(entityClass -> morphia.mapPackageFromClass(entityClass));
 		ds.ensureIndexes();
 		info = "MongoDB database: " + user + (password == null ? "" : "/***") + "@" + name + ":" + dbhost;
 	}
