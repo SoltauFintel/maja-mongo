@@ -1,30 +1,19 @@
 package de.mwvb.maja.mongo;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-import org.pmw.tinylog.Logger;
-
 import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
 import com.google.inject.Module;
 import com.google.inject.Provides;
 
 import de.mwvb.maja.web.AppConfig;
-import de.mwvb.maja.web.BroadcastListener;
-import de.mwvb.maja.web.Broadcaster;
 import de.mwvb.maja.web.Plugin;
 
-public class MongoPlugin implements Plugin, BroadcastListener {
-	public static final String ENTITY_CLASS = "entityClass";
-	private final List<Class<?>> entityClasses;
+public class MongoPlugin implements Plugin {
+	private final Class<?> entityClasses[];
 	private String info;
-	@Inject
-	private Broadcaster broadcaster;
 	
 	public MongoPlugin(Class<?> ... entityClasses) {
-		this.entityClasses = new ArrayList<>(Arrays.asList(entityClasses));
+		this.entityClasses = entityClasses;
 	}
 	
 	@Override
@@ -38,19 +27,18 @@ public class MongoPlugin implements Plugin, BroadcastListener {
 			
 			@Provides
 			@Inject
-			public Database provideDatabase(AppConfig config) {
+			public Database database(AppConfig config) {
 				if (database == null) {
-					String dbhost = config.get("dbhost", "localhost");
-					String dbname = config.get("dbname");
-					if (dbname == null || dbname.trim().isEmpty()) {
-						throw new RuntimeException("Parameter 'dbname' missing in config.");
+					String host = config.get("dbhost", "localhost");
+					String databaseName = config.get("dbname");
+					if (databaseName == null || databaseName.trim().isEmpty()) {
+						throw new RuntimeException("dbname missing in AppConfig.properties");
 					}
-					Logger.trace("open database " + dbname);					
-					String dbuser = config.get("dbuser"); // optional parameter
-					String dbpw = config.get("dbpw");     // optional parameter
-					database = new Database(dbhost, dbname, dbuser, dbpw, entityClasses);
-					info = "MongoDB database: " + (dbuser == null ? "" : (dbuser + (dbpw == null ? "" : "/***") + "@"))
-							+ dbname + ":" + dbhost;
+					String user = config.get("dbuser");
+					String password = config.get("dbpw");
+					database = new Database(host, databaseName, user, password, entityClasses);
+					info = "MongoDB database: " + (user == null ? "" : (user + (password == null ? "" : "/***") + "@"))
+							+ databaseName + ":" + host;
 				}
 				return database;
 			}
@@ -58,12 +46,7 @@ public class MongoPlugin implements Plugin, BroadcastListener {
 	}
 	
 	@Override
-	public void prepare() {
-		broadcaster.addListener(this);
-	}
-
-	@Override
-	public void install() {
+	public void init() {
 	}
 
 	@Override
@@ -73,17 +56,5 @@ public class MongoPlugin implements Plugin, BroadcastListener {
 	@Override
 	public void printInfo() {
 		System.out.println(info);
-	}
-
-	@Override
-	public void handle(String topic, String data) {
-		if (ENTITY_CLASS.equals(topic) && data != null && !data.trim().isEmpty()) {
-			try {
-System.out.println("add entityClass: " + data);				
-				entityClasses.add(Class.forName(data));
-			} catch (ClassNotFoundException e) {
-				throw new RuntimeException(e);
-			}
-		}
 	}
 }
