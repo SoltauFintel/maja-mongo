@@ -12,6 +12,8 @@ import com.mongodb.MongoClient;
 import com.mongodb.MongoCredential;
 import com.mongodb.ServerAddress;
 
+import de.mwvb.maja.web.AppConfig;
+
 /**
  * Zugriff auf MongoDB
  */
@@ -23,6 +25,21 @@ public class Database {
 	
 	static {
 		MorphiaLoggerFactory.registerLogger(SLF4JLoggerImplFactory.class);
+	}
+	
+	public static void open(Class<?> ... entityClasses) {
+		AppConfig config = new AppConfig();
+		String dbname = config.get("dbname");
+		if (dbname == null || dbname.isEmpty()) {
+			throw new RuntimeException("Config parameter 'dbname' missing!");
+		}
+		String dbhost = config.get("dbhost", "localhost");
+		String dbuser = config.get("dbuser");
+		String dbpw = config.get("dbpw");
+		AbstractDAO.database = new Database(dbhost, dbname, dbuser, dbpw, entityClasses);
+		System.out.println("MongoDB database: " + dbname + "@" + dbhost
+				+ (config.hasFilledKey("dbuser") ? dbuser : "")
+				+ (config.hasFilledKey("dbpw") ? " with password" : ""));
 	}
 	
 	/**
