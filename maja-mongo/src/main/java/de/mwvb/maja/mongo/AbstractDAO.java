@@ -8,11 +8,7 @@ import java.util.zip.CRC32;
 import org.mongodb.morphia.Datastore;
 import org.mongodb.morphia.query.Query;
 
-import com.google.inject.Inject;
-
 public abstract class AbstractDAO<E> {
-	@Inject
-	private Database database;
 	
 	/**
 	 * @return entity class
@@ -61,7 +57,7 @@ public abstract class AbstractDAO<E> {
 	}
 
 	protected final Datastore ds() {
-		return database.ds();
+		return MongoPlugin.database.ds();
 	}
 
 	public static String genId() {
