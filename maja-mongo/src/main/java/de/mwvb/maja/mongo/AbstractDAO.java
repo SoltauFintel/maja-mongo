@@ -65,4 +65,16 @@ public abstract class AbstractDAO<E> {
 		String ret = "000000" + Integer.toString((int) crc.getValue(), 36).toLowerCase().replace("-", "");
 		return ret.substring(ret.length() - 6);
 	}
+	
+	public static void checkId6(String id) {
+		if (id == null || id.trim().length() != 6) {
+			throw new RuntimeException("Illegal id");
+		}
+		for (int i = 0; i < id.length(); i++) {
+			char c = id.charAt(i);
+			if (!((c >= '0' && c <= '9') || (c >= 'a' && c <= 'z'))) {
+				throw new RuntimeException("Illegal id");
+			}
+		}
+	}
 }
