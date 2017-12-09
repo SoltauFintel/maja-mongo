@@ -38,7 +38,8 @@ public class Database {
 		String dbpw = config.get("dbpw");
 		AbstractDAO.database = new Database(dbhost, dbname, dbuser, dbpw, entityClasses);
 		System.out.println("MongoDB database: " + dbname + "@" + dbhost
-				+ (config.hasFilledKey("dbuser") ? (dbuser + (config.hasFilledKey("dbpw") ? " with password" : "")) : ""));
+				+ (config.hasFilledKey("dbuser") ? (" with user " + dbuser + (config.hasFilledKey("dbpw")
+						? " with password" : "")) : ""));
 	}
 	
 	/**
